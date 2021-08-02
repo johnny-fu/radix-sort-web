@@ -1,0 +1,778 @@
+<html>
+<head>
+<title>radix sort</title>
+ <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+</head>
+<body onload="start();">
+ <nav class="nav navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span> 
+                </button>
+                
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li><a data-toggle="tab" href="">Radix Sort</a></li>
+                    <li><a data-toggle="tab" href="">其他演算法</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+					<li><a href="radix sort.html">回到radixsort</a></li>
+					<li><a href="exam.html">前往測驗</a></li>
+                    <li><a href="loginin.html">登出</a></li>
+                    <li><a href="writer.html">作者的窩</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<table>
+<tr>
+<th>
+<p align="left">
+<font color=red size="5">Radix Sort</font><br><br>
+Student ID:<span id='cc'></span><br><br>
+<input type="radio" name="num" value="eight" checked>8進位
+<input type="radio" name="num" value="ten">10進位
+<input type="radio" name="num" value="sixteen">16進位
+<br><br>
+產生<input type=text id="carry">個數字</input>
+<button onclick="resetall();getnum();showarray();">產生亂數</button>
+<br>
+<span id="showtable"></span>
+模式 : 	<input type="radio" name="mode" value="Animation" checked>Animation
+		<input type="radio" name="mode" value="Step">Step
+		<input type="radio" name="mode" value="Run-all">Run-all<br>
+速度 : 	<input type="radio" name="speed" value=800 checked>快
+		<input type="radio" name="speed" value=1500>慢<br>
+<button onclick="judgemode();">開始排序</button>
+<button onclick="next();">下一步</button>
+<span id="test"></span>
+<canvas id="myCanvas" width="750" height="400" style="border:1px solid #000000;">0.0</canvas>
+<span id="showaftersortarraytext"></span>
+<span id="showaftersortarray"></span>
+</p>
+</th>
+<th valign="top">
+<br><br><br><br><br><br><br><br><br><br><br>
+目前步驟:<br>
+<textarea cols="100" rows="4"  readonly="readonly" id="nowprocess"></textarea><br>
+所有過程:<br>
+<textarea cols="100" rows="16" readonly="readonly" id="allprocess"></textarea><br>
+</th>
+</tr>
+</table>
+<script>
+var sid=localStorage.getItem("id");
+var numran,carry=10;
+var numarray=[],numarray2=[],originalnum=[];
+var judgeshow=0,judgestep=0;
+var aaa="",speed,mode;
+var bbb = document.getElementsByName("num");
+var ccc=["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
+var numarraysixteen=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var settime;
+var iii=0,judgement=0;
+var judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var text="",textall="";
+function resetall(){
+	clearInterval(settime);
+	numran=carry=10;
+	numarray=[],numarray2=[];
+	judgeshow=0;
+	bbb = document.getElementsByName("num");
+	for(var i=0;i<bbb.length;i++){
+		if(bbb[i].checked) aaa=bbb[i].value; //進位值
+	numarraysixteen=[];
+	bbb = document.getElementsByName("speed");
+	for(var i=0;i<bbb.length;i++)
+	{
+		if(bbb[i].checked) speed=bbb[i].value; //speed
+	}
+	bbb = document.getElementsByName("mode");
+	for(var i=0;i<bbb.length;i++)
+	{
+		if(bbb[i].checked) mode=bbb[i].value; //mode
+	}
+	
+	}
+	text="";
+	textall="";
+	document.getElementById("nowprocess").value = text;
+	document.getElementById("allprocess").value = textall;
+	clearCanvas();
+	
+}
+function getnum(){
+	bbb = document.getElementsByName("num");
+	for(var i=0;i<bbb.length;i++)
+	{
+		if(bbb[i].checked) aaa=bbb[i].value; //speed
+	}
+	carry=document.getElementById("carry").value;
+	if(aaa=="eight"){
+		for(var ii=0;ii<carry;ii++){
+			numran=Math.floor(Math.random()*511+1);			
+			numran=numran.toString(8);
+			numarray[ii]=numran;
+			originalnum[ii]=numarray[ii];
+		}
+	}
+	if(aaa=="ten"){
+		for(var ii=0;ii<carry;ii++){
+			numran=Math.floor(Math.random()*999+1);
+			numarray[ii]=numran;
+			originalnum[ii]=numarray[ii];
+		}
+	}
+	if(aaa=="sixteen"){
+		for(var ii=0;ii<carry;ii++){
+			numran=Math.floor(Math.random()*4095+1);			
+			numran=numran.toString(16);
+			numarray[ii]=numran;
+			originalnum[ii]=numarray[ii];
+		}
+	}
+}
+function judgemode(){
+	bbb = document.getElementsByName("speed");
+	for(var i=0;i<bbb.length;i++)
+	{
+		if(bbb[i].checked) speed=bbb[i].value; //speed
+	}
+	bbb = document.getElementsByName("mode");
+	for(var i=0;i<bbb.length;i++)
+	{
+		if(bbb[i].checked) mode=bbb[i].value; //mode
+	}
+	if(mode=="Animation"){
+		clearInterval(settime);
+		iii2=0;
+		judgeanimation=0;
+		judgestep=0;
+		numtooriginal();
+		text="";
+		textall="";
+		document.getElementById("nowprocess").value = text;
+		document.getElementById("allprocess").value = textall;
+		document.getElementById("showaftersortarray").innerHTML=" ";
+		showbase();
+		showtext2();
+	}
+	if(mode=="Step"){
+		clearInterval(settime);
+		judgement=0;
+		iii=0;
+		judgestep=1;
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		text="";
+		textall="";
+		document.getElementById("nowprocess").value = text;
+		document.getElementById("allprocess").value = textall;
+		document.getElementById("showaftersortarray").innerHTML=" ";
+		numtooriginal();
+		showbase();
+		next();
+	}
+	if(mode=="Run-all"){
+		clearInterval(settime);
+		text="";
+		textall="";
+		document.getElementById("nowprocess").value = text;
+		document.getElementById("allprocess").value = textall;
+		document.getElementById("showaftersortarray").innerHTML=" ";
+		judgestep=0;
+		numtooriginal();
+		showtext();
+	
+	}
+}
+function showarray(){
+	var showtable="";
+	carry=document.getElementById("carry").value;
+	for(var i=0;i<carry;i++){
+		if(i==0) showtable+="<table border><tr align='right'>";
+		showtable+="<td>A[";
+		showtable+=i;
+		showtable+="]</td>";
+		if(i==carry)showtable+="</tr>";
+	}
+	for(var i=0;i<carry;i++){
+		if(i==0) showtable+="<tr align='right'>";
+		showtable+="<td>";
+		showtable+=numarray[i];
+		showtable+="</td>";
+		if(i==carry)showtable+="</tr></table>";
+		if(judgeshow==0)
+		document.getElementById("showtable").innerHTML=showtable;
+		else {
+			document.getElementById("showaftersortarray").innerHTML=showtable;
+			document.getElementById("showaftersortarraytext").innerHTML="排序過後的陣列:";
+		}
+	} 
+}
+function sortarrayone(){
+var j=i-1;
+	if(aaa=="sixteen"){
+		for(var i=1;i<carry;i++){
+			var key=numarraysixteen[i];
+			j=i-1;
+			while(key%16 < numarraysixteen[j]%16 && j >= 0){
+				numarraysixteen[j+1] = numarraysixteen[j];
+				numarray[j+1] = numarray[j];
+				j--;
+				
+			}
+			numarraysixteen[j+1]=key;
+			key=key.toString(16);	
+			numarray[j+1]=key;
+		}
+	}
+	else{
+		for(var i=1;i<carry;i++){
+			var key=numarray[i];
+			var j=i-1;
+			while(key%10 < numarray[j]%10 && j >= 0){
+				numarray[j+1] = numarray[j];
+				j--;
+			}
+			numarray[j+1]=key;	
+		}
+	}
+}
+function sortarrayten(){
+	if(aaa=="sixteen"){
+		for(var i=1;i<carry;i++){
+			var key=numarraysixteen[i];
+			var j=i-1;
+			while(key%256 < numarraysixteen[j]%256 && j >= 0){
+				numarraysixteen[j+1] = numarraysixteen[j];
+				numarray[j+1] = numarray[j];
+				j--;
+			}
+			numarraysixteen[j+1]=key;
+			key=key.toString(16);	
+			numarray[j+1]=key;
+		}
+	}
+	else {
+	for(var i=1;i<carry;i++){
+		var key=numarray[i];
+		var j=i-1;
+		while(key%100 < numarray[j]%100 && j >= 0){
+			numarray[j+1] = numarray[j];
+            j--;
+		}
+		numarray[j+1]=key;
+		
+	}
+	}
+}
+function sortarrayhundred(){
+	if(aaa=="sixteen"){
+		for(var i=1;i<carry;i++){
+			var key=numarraysixteen[i];
+			var j=i-1;
+			while(key%4096 < numarraysixteen[j]%4096 && j >= 0){
+				numarraysixteen[j+1] = numarraysixteen[j];
+				numarray[j+1] = numarray[j];
+				j--;
+			}
+			numarraysixteen[j+1]=key;
+			key=key.toString(16);	
+			numarray[j+1]=key;
+		}
+	}
+	else {
+	for(var i=1;i<carry;i++){
+		var key=numarray[i];
+		var j=i-1;
+		while(key%1000 < numarray[j]%1000 && j >= 0){
+			numarray[j+1] = numarray[j];
+            j--;
+		}
+		numarray[j+1]=key;
+		
+	}
+	}
+}
+function numtooriginal(){
+	for(var ii=0;ii<numarray.length;ii++){
+			numarray[ii]=originalnum[ii];
+		}
+}
+//canvas
+var canvas1 = document.getElementById("myCanvas");
+var ctx = canvas1.getContext("2d");
+function showbase(){
+	clearCanvas();
+	ctx.textAlign="start";
+	ctx.beginPath();
+	ctx.moveTo(70, 350);
+	ctx.lineTo(730, 350);
+	ctx.lineWidth = 5;
+	ctx.strokeStyle ="#000000";
+	ctx.stroke();
+	ctx.font = "14pt Arial";
+	ctx.fillText("bucket", 5, 355);
+	if(aaa=="eight")for(var i=0;i<8;i++){ctx.fillText(ccc[i],i*40+93, 380);}
+	if(aaa=="ten")for(var i=0;i<10;i++){ctx.fillText(ccc[i],i*40+93, 380);}
+	if(aaa=="sixteen")for(var i=0;i<16;i++){ctx.fillText(ccc[i],i*40+93, 380);}
+}
+//run-all 
+function showtext(){
+	var judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	showbase();
+	if(aaa=="eight" || aaa=="ten"){
+		ctx.font = "14pt Arial";
+		for(var i=0;i<numarray.length;i++){
+			ctx.textAlign="end";
+			ctx.fillText(numarray[i],numarray[i]%10*40+115, 330-judge[numarray[i]%10]*30);
+			judge[numarray[i]%10]++;
+			text="比較個位數，將A["+i+"] = "+numarray[i]+"放入第"+numarray[i]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+		}
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayone();
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		for(var i=0;i<numarray.length;i++){
+			numarray2[i]=Math.floor(numarray[i]/10);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[i],numarray2[i]%10*40+115, 330-judge[numarray2[i]%10]*30);
+			judge[numarray2[i]%10]++;
+			text="比較十位數，將A["+i+"] = "+numarray[i]+"放入第"+numarray2[i]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+		}
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayten();
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		for(var i=0;i<numarray.length;i++){
+			numarray2[i]=Math.floor(numarray[i]/100);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[i],numarray2[i]%10*40+115, 330-judge[numarray2[i]%10]*30);
+			judge[numarray2[i]%10]++;                                                          
+			text="比較百位數，將A["+i+"] = "+numarray[i]+"放入第"+numarray2[i]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+		}
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		judgeshow=1;
+		sortarrayhundred();
+		showarray();
+	}
+	if(aaa=="sixteen"){
+	var test2="";
+		ctx.font = "14pt Arial";	
+		for(var i=0;i<numarray.length;i++){
+			numarraysixteen[i]=parseInt(numarray[i], 16);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[i],(numarraysixteen[i]%16)*40+115, 330-judge[numarraysixteen[i]%16]*30);
+			judge[numarraysixteen[i]%16]++;
+			text="比較個位數，將A["+i+"] = "+numarray[i]+"放入第"+numarraysixteen[i]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+		}
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayone();
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		for(var i=0;i<numarray.length;i++){
+			numarraysixteen[i]=parseInt(numarray[i], 16);
+			numarray2[i]=Math.floor(numarraysixteen[i]/16);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[i],numarray2[i]%16*40+115, 330-judge[numarray2[i]%16]*30);
+			judge[numarray2[i]%16]++;
+			text="比較十位數，將A["+i+"] = "+numarray[i]+"放入第"+numarray2[i]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+		}
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayten();
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		for(var i=0;i<numarray.length;i++){
+			numarraysixteen[i]=parseInt(numarray[i], 16);
+			numarray2[i]=Math.floor(numarraysixteen[i]/256);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[i],numarray2[i]%16*40+115, 330-judge[numarray2[i]%16]*30);
+			judge[numarray2[i]%16]++;
+			text="比較百位數，將A["+i+"] = "+numarray[i]+"放入第"+numarray2[i]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+		}
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayhundred();
+		judgeshow=1;
+		showarray();
+	}
+}
+function clearCanvas(){
+			ctx.clearRect(0, 0, canvas1.width, canvas1.height);		//清空canvas
+}
+//animation
+var iii2=0;
+var judgeanimation=0;
+function showtext2(){
+	judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	bbb = document.getElementsByName("speed");
+	for(var i=0;i<bbb.length;i++)
+	{
+		if(bbb[i].checked)var speed=bbb[i].value; //speed
+	}
+	if(aaa=="eight" || aaa=="ten"){
+		//時間(個位數)
+		settime=setInterval(
+		function (){
+			if(iii2==numarray.length)iii2++;
+			if(iii2<numarray.length && judgeanimation==0){
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii2],numarray[iii2]%10*40+115, 330-judge[numarray[iii2]%10]*30);
+			judge[numarray[iii2]%10]++;
+			text="比較個位數，將A["+iii2+"] = "+numarray[iii2]+"放入第"+numarray[iii2]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii2++;
+			}
+			if(iii2>numarray.length && judgeanimation==0){
+			text="將bucket內資料放入陣列，處理結束\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			sortarrayone();
+			judgeshow=1;
+			judgeanimation=1;
+			showarray();
+			judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+			clearCanvas();
+			showbase();
+			iii2=0;
+			}
+			if(iii2<numarray.length && judgeanimation==1){
+			ctx.textAlign="end";
+			numarray2[iii2]=Math.floor(numarray[iii2]/10);
+			ctx.fillText(numarray[iii2],numarray2[iii2]%10*40+115, 330-judge[numarray2[iii2]%10]*30);
+			judge[numarray2[iii2]%10]++;
+			text="比較十位數，將A["+iii2+"] = "+numarray[iii2]+"放入第"+numarray2[iii2]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii2++;
+			}
+			if(iii2>numarray.length && judgeanimation==1){
+			text="將bucket內資料放入陣列，處理結束\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			sortarrayten();
+			judgeshow=1;
+			judgeanimation=2;
+			showarray();
+			judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+			clearCanvas();
+			showbase();
+			iii2=0;
+			}
+			if(iii2<numarray.length && judgeanimation==2){
+			ctx.textAlign="end";
+			numarray2[iii2]=Math.floor(numarray[iii2]/100);
+			ctx.fillText(numarray[iii2],numarray2[iii2]%10*40+115, 330-judge[numarray2[iii2]%10]*30);
+			judge[numarray2[iii2]%10]++;
+			text="比較百位數，將A["+iii2+"] = "+numarray[iii2]+"放入第"+numarray2[iii2]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii2++;
+			}
+			if(iii2>numarray.length && judgeanimation==2){
+			text="將bucket內資料放入陣列，處理結束\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			sortarrayhundred();
+			judgeshow=1;
+			judgeanimation=3;
+			showarray();
+			judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];	
+			iii2=0;
+			clearInterval(settime);
+			}
+		},speed);
+		
+	}
+	if(aaa=="sixteen"){
+		settime=setInterval(
+		function (){
+			if(iii2==numarray.length)iii2++;
+			if(iii2<numarray.length && judgeanimation==0){
+			ctx.textAlign="end";
+			numarraysixteen[iii2]=parseInt(numarray[iii2], 16);
+			ctx.fillText(numarray[iii2],numarraysixteen[iii2]%16*40+115, 330-judge[numarraysixteen[iii2]%16]*30);
+			judge[numarraysixteen[iii2]%16]++;
+			text="比較個位數，將A["+iii2+"] = "+numarray[iii2]+"放入第"+numarraysixteen[iii2]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii2++;
+			}
+			if(iii2>numarray.length && judgeanimation==0){
+			text="將bucket內資料放入陣列，處理結束\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			sortarrayone();
+			judgeshow=1;
+			judgeanimation=1;
+			showarray();
+			judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+			clearCanvas();
+			showbase();
+			iii2=0;
+			}
+			if(iii2<numarray.length && judgeanimation==1){
+			ctx.textAlign="end";
+			numarraysixteen[iii2]=parseInt(numarray[iii2], 16);
+			numarray2[iii2]=Math.floor(numarraysixteen[iii2]/16);
+			ctx.fillText(numarray[iii2],numarray2[iii2]%16*40+115, 330-judge[numarray2[iii2]%16]*30);
+			judge[numarray2[iii2]%16]++;
+			text="比較十位數，將A["+iii2+"] = "+numarray[iii2]+"放入第"+numarray2[iii2]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii2++;
+			}
+			if(iii2>numarray.length && judgeanimation==1){
+			text="將bucket內資料放入陣列，處理結束\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			sortarrayten();
+			judgeshow=1;
+			judgeanimation=2;
+			showarray();
+			judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+			clearCanvas();
+			showbase();
+			iii2=0;
+			}
+			if(iii2<numarray.length && judgeanimation==2){
+			ctx.textAlign="end";
+			numarraysixteen[iii2]=parseInt(numarray[iii2], 16);
+			numarray2[iii2]=Math.floor(numarraysixteen[iii2]/256);
+			ctx.fillText(numarray[iii2],numarray2[iii2]%16*40+115, 330-judge[numarray2[iii2]%16]*30);
+			judge[numarray2[iii2]%16]++;
+			text="比較百位數，將A["+iii2+"] = "+numarray[iii2]+"放入第"+numarray2[iii2]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii2++;
+			}
+			if(iii2>numarray.length && judgeanimation==2){
+			text="將bucket內資料放入陣列，處理結束\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			sortarrayhundred();
+			judgeshow=1;
+			judgeanimation=3;
+			showarray();
+			judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];	
+			iii2=0;
+			clearInterval(settime);
+			}
+		},speed);
+		
+		
+	}
+}
+//step 
+function next(){
+	if(judgestep!=1)alert("請先點開始排序或選Step再點下一步!");
+	if(aaa=="eight" || aaa=="ten"){
+		ctx.font = "14pt Arial";
+		if(iii<numarray.length && judgement==0){
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii],numarray[iii]%10*40+115, 330-judge[numarray[iii]%10]*30);
+			judge[numarray[iii]%10]=judge[numarray[iii]%10]+1;
+			text="比較個位數，將A["+iii+"] = "+numarray[iii]+"放入第"+numarray[iii]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii++;
+		}
+		else if(iii==numarray.length && judgement==0) {
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayone();
+		judgement=1;
+		judgeshow=1;
+		showarray();
+		iii=0;
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		}
+		if(iii<numarray.length && judgement==1){
+			numarray2[iii]=Math.floor(numarray[iii]/10);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii],numarray2[iii]%10*40+115, 330-judge[numarray2[iii]%10]*30);
+			judge[numarray2[iii]%10]++;
+			text="比較十位數，將A["+iii+"] = "+numarray[iii]+"放入第"+numarray2[iii]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii++;
+		}
+		else if(iii==numarray.length && judgement==1) {
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayten();
+		judgement=2;
+		showarray();
+		iii=0;
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		}
+		if(iii<numarray.length && judgement==2){
+			numarray2[iii]=Math.floor(numarray[iii]/100);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii],numarray2[iii]%10*40+115, 330-judge[numarray2[iii]%10]*30);
+			judge[numarray2[iii]%10]++;
+			text="比較百位數，將A["+iii+"] = "+numarray[iii]+"放入第"+numarray2[iii]%10+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii++;
+		}
+		else if(iii==numarray.length && judgement==2) {
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayhundred();
+		judgement=3;
+		iii=0;
+		showarray();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		}
+	}
+	
+	if(aaa=="sixteen"){
+		ctx.font = "14pt Arial";
+		if(iii<numarray.length && judgement==0){
+			numarraysixteen[iii]=parseInt(numarray[iii], 16);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii],numarraysixteen[iii]%16*40+115, 330-judge[numarraysixteen[iii]%16]*30);
+			judge[numarraysixteen[iii]%16]++;
+			text="比較個位數，將A["+iii+"] = "+numarray[iii]+"放入第"+numarraysixteen[iii]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii++;
+		}
+		else if(iii==numarray.length && judgement==0) {
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayone();
+		judgement=1;
+		judgeshow=1;
+		showarray();
+		iii=0;
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		}
+		if(iii<numarray.length && judgement==1){
+			numarray2[iii]=Math.floor(numarraysixteen[iii]/16);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii],numarray2[iii]%16*40+115, 330-judge[numarray2[iii]%16]*30);
+			judge[numarray2[iii]%16]++;
+			text="比較十位數，將A["+iii+"] = "+numarray[iii]+"放入第"+numarray2[iii]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii++;
+		}
+		else if(iii==numarray.length && judgement==1) {
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayten();
+		judgement=2;
+		showarray();
+		iii=0;
+		showbase();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		}
+		if(iii<numarray.length && judgement==2){
+			numarray2[iii]=Math.floor(numarraysixteen[iii]/256);
+			ctx.textAlign="end";
+			ctx.fillText(numarray[iii],numarray2[iii]%16*40+115, 330-judge[numarray2[iii]%16]*30);
+			judge[numarray2[iii]%16]++;
+			text="比較百位數，將A["+iii+"] = "+numarray[iii]+"放入第"+numarray2[iii]%16+"個bucket\n";
+			document.getElementById("nowprocess").value = text;
+			textall=textall+text;
+			document.getElementById("allprocess").value = textall;
+			iii++;
+		}
+		else if(iii==numarray.length && judgement==2) {
+		text="將bucket內資料放入陣列，處理結束\n";
+		document.getElementById("nowprocess").value = text;
+		textall=textall+text;
+		document.getElementById("allprocess").value = textall;
+		sortarrayhundred();
+		judgement=3;
+		iii=0;
+		showarray();
+		judge=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		}
+	}
+}
+function start(){
+	document.getElementById('cc').innerHTML=sid; 
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>Login in</title>
+</head>
+<script>
+function writeIdPassword(){
+	var StudentID=document.getElementById('sid').value;
+	var Password=document.getElementById('pas').value;
+	localStorage.setItem("id",StudentID);
+	localStorage.setItem("sec",Password);
+	
+
+}
+</script>
+<body>
+<center>
+<font color=blue size="7">Welcome to my Radix Sort login page<hr>
+<table>
+<tr><td align="center">
+
+Student ID:<input type="text" id="sid"><br>
+</td></tr>
+<tr><td align="center">
+Surbname :<input type="text" id="pas"><br>
+</td></tr>
+<tr><td align="center">
+
+<button onclick="writeIdPassword();window.location='radix sort.html';">Login In</button>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button onclick=''>forget password?</button>
+</td></tr>
+</table>
+
+
+
+</body>
+</html>
